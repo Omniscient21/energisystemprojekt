@@ -1,4 +1,4 @@
-# I den här filen bygger ni modellen. Notera att det är skrivet som en modul, dvs ett paket. 
+# I den här filen bygger ni modellen. Notera att det är skrivet som en modul, dvs ett paket.
 # Så när ni ska använda det, så skriver ni Using energisystemprojekt i er REPL, då får ni ut det ni
 # exporterat. Se rad 9.
 
@@ -13,7 +13,7 @@ include("input_energisystemprojekt.jl")
 function buildmodel(input)
 
     println("\nBuilding model...")
- 
+
     @unpack REGION, PLANT, HOUR, numregions, load, maxcap = input
 
     m = Model(Gurobi.Optimizer)
@@ -38,7 +38,7 @@ function buildmodel(input)
 
         SystemCost[r in REGION],
             Systemcost[r] >= 0 # sum of all annualized costs
-    
+
     end #constraints
 
 
@@ -50,21 +50,21 @@ function buildmodel(input)
 
 end # buildmodel
 
-function runmodel() 
+#function runmodel()
 
     input = read_input()
 
     model = buildmodel(input)
 
-    @unpack m, Capacity = model   
-    
+    @unpack m, Capacity = model
+
     println("\nSolving model...")
-    
+
     status = optimize!(m)
-    
+
 
     if termination_status(m) == MOI.OPTIMAL
-        println("\nSolve status: Optimal")   
+        println("\nSolve status: Optimal")
     elseif termination_status(m) == MOI.TIME_LIMIT && has_values(m)
         println("\nSolve status: Reached the time-limit")
     else
@@ -76,7 +76,7 @@ function runmodel()
 
 
     println("Cost (M€): ", Cost_result)
-   
+
     nothing
 
 end #runmodel
@@ -84,4 +84,3 @@ end #runmodel
 
 
 end # module
-
