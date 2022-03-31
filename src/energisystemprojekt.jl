@@ -50,7 +50,7 @@ function buildmodel(input)
 
 end # buildmodel
 
-#function runmodel()
+function runmodel()
 
     input = read_input()
 
