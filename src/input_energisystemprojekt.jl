@@ -18,7 +18,7 @@ function read_input()
     numregions = length(REGION)
     numhours = length(HOUR)
 
-    timeseries = CSV.read("$folder\\TimeSeries.csv", DataFrame)
+    #timeseries = CSV.read("$folder\\TimeSeries.csv", DataFrame)
     wind_cf = AxisArray(ones(numregions, numhours), REGION, HOUR)
     load = AxisArray(zeros(numregions, numhours), REGION, HOUR)
 
