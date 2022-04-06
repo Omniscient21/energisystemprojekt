@@ -9,7 +9,7 @@ function read_input()
 
     #Sets
     REGION = [:DE, :SE, :DK]
-    PLANT = [:Wind, :PV, :Gas, :Hydro, :Batteries, :Transmission, :Nuclear]
+    PLANT = [:Wind, :PV, :Gas, :Hydro] #:Batteries, :Transmission, :Nuclear]
     HOUR = 1:8760
 
     #Parameters
@@ -26,7 +26,7 @@ function read_input()
         end
 
     myinf = 1e8
-    maxcaptable = [                                                             # GW
+    maxcaptable = [ # GW
             # PLANT       DE             SE              DK
             :Wind         280            90              180
             :PV           75             60              460
@@ -53,6 +53,6 @@ function read_input()
 
     discountrate=0.05
 
-          return (; REGION, PLANT, HOUR, numregions, load, maxcap)
+    return (; REGION, PLANT, HOUR, numregions, load, maxcap)
 
 end # read_input

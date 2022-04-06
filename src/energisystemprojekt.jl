@@ -14,7 +14,7 @@ function buildmodel(input)
 
     println("\nBuilding model...")
 
-    @unpack REGION, PLANT, HOUR, numregions, load, maxcap = input
+    @unpack REGION, PLANT, HOUR, numregions, load, maxcap, assumptions = input
 
     m = Model(Gurobi.Optimizer)
 
