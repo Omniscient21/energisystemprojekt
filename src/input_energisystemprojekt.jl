@@ -1,8 +1,6 @@
 # I den här filen kan ni stoppa all inputdata.
 # Läs in datan ni fått som ligger på Canvas genom att använda paketen CSV och DataFrames
 
-# Test comment
-
 using CSV, DataFrames
 
 function read_input()
@@ -11,7 +9,7 @@ function read_input()
 
     #Sets
     REGION = [:DE, :SE, :DK]
-    PLANT = [:Hydro, :Gas] # Add all plants
+    PLANT = [:Wind, :PV, :Gas, :Hydro, :Batteries, :Transmission, :Nuclear]
     HOUR = 1:8760
 
     #Parameters
@@ -29,10 +27,15 @@ function read_input()
 
     myinf = 1e8
     maxcaptable = [                                                             # GW
-            # PLANT      DE             SE              DK
-            :Hydro       0              14              0
-            :Gas         myinf          myinf           myinf
-            ]
+            # PLANT       DE             SE              DK
+            :Wind         280            90              180
+            :PV           75             60              460
+            :Gas          myinf          myinf           myinf
+            :Hydro        0              14              0
+            #:Batteries    myinf          myinf           myinf
+            #:Transmission myinf          myinf           myinf
+            #:Nuclear      myinf          myinf           myinf
+    ]
 
     assumptions = [
         # Plant      Inv. cost   Run. cost  Fuel cost   Lifetime    Efficiency  Em. factor
@@ -40,9 +43,9 @@ function read_input()
         :PV             600         0.1         0           25          0           0
         :Gas            550         2           22          30          0.4         0.202
         :Hydro          0           0.1         0           80          0           0
-        :Batteries      150         0.1         0           10          0.9         0
-        :Transmission   2500        0           0           50          0.98        0
-        :Nuclear        7700        4           3.2         50          0.4         0
+        #:Batteries      150         0.1         0           10          0.9         0
+        #:Transmission   2500        0           0           50          0.98        0
+        #:Nuclear        7700        4           3.2         50          0.4         0
     ] #TODO: check asterisks
 
     maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT) # MW
