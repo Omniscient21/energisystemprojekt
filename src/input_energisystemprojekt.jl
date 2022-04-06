@@ -34,6 +34,17 @@ function read_input()
             :Gas         myinf          myinf           myinf
             ]
 
+    assumptions = [
+        # Plant      Inv. cost   Run. cost  Fuel cost   Lifetime    Efficiency  Em. factor
+        :Wind           1100        0.1         0           25          0           0
+        :PV             600         0.1         0           25          0           0
+        :Gas            550         2           22          30          0.4         0.202
+        :Hydro          0           0.1         0           80          0           0
+        :Batteries      150         0.1         0           10          0.9         0
+        :Transmission   2500        0           0           50          0.98        0
+        :Nuclear        7700        4           3.2         50          0.4         0
+    ] #TODO: check asterisks
+
     maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT) # MW
 
 
