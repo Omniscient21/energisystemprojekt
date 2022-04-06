@@ -1,9 +1,12 @@
+"""
+  Constructs and returns the energy system model.
+"""
 
 function buildmodel(input)
 
     println("\nBuilding model...")
 
-    @unpack REGION, PLANT, HOUR, numregions, load, maxcap = input
+    @unpack REGION, PLANT, HOUR, numregions, load, maxcap, assum, discountrate = input
 
     m = Model(Gurobi.Optimizer)
 
@@ -11,7 +14,6 @@ function buildmodel(input)
 
         Electricity[r in REGION, p in PLANT, h in HOUR]       >= 0        # MWh/h
         Capacity[r in REGION, p in PLANT]                     >= 0        # MW
-
     end #variables
 
 
@@ -25,11 +27,17 @@ function buildmodel(input)
         Generation[r in REGION, p in PLANT, h in HOUR],
             Electricity[r, p, h] <= Capacity[r, p] # * capacity factor
 
-        #SystemCost[r in REGION],
-            #Systemcost[r] >= 0 # sum of all annualized costs
+        SystemCost[r in REGION],
+            Systemcost[r] >= 0 # sum of all annualized costs
 
     end #constraints
 
+    RunningCost[r in REGION] = sum(Electricity[r,p,h]*assumptions[p,RunCost] for p in PLANT, h in HOURS)
+    function a(p)
+        1-(1/(1+r)^assumptions[p,5])
+    end
+    InvestmentCost[r in REGION] = sum(Capacity[r,p]*assumptions[p,InvestmentCost]*discountrate/a[p] for p in PLANT)
+    Systemcost[r in REGION] = Runningcost[r] + Investmentcost[r]
 
     @objective m Min begin
         sum(Systemcost[r] for r in REGION)
@@ -39,17 +47,7 @@ function buildmodel(input)
 
 end # buildmodel
 
-function calculate_systemCost
-
-
-end # calculate_systemCost
-
 function calculate_generation(input)
 
 
 end # calculate_generation
-
-function calculate_electricity(input)
-
-
-end # calculate_electricity

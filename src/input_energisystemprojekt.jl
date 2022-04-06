@@ -1,6 +1,10 @@
 # I den här filen kan ni stoppa all inputdata.
 # Läs in datan ni fått som ligger på Canvas genom att använda paketen CSV och DataFrames
 
+"""
+  Manages all input data for the energy stystem.
+"""
+
 using CSV, DataFrames, AxisArrays
 
 function read_input()
@@ -10,6 +14,7 @@ function read_input()
     #Sets
     REGION = [:DE, :SE, :DK]
     PLANT = [:Wind, :PV, :Gas, :Hydro] #:Batteries, :Transmission, :Nuclear]
+    PLANTFACT = [:InvestmentCost, :RunCost, :FuelCost, :Lifetime, :Efficiency, :EmissionFactor]
     HOUR = 1:8760
 
     #Parameters
@@ -49,9 +54,10 @@ function read_input()
     ] #TODO: check asterisks
 
     maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT) # MW
+    assum = AxisArray(assumptions[:,2:end]'.*1000, PLANTFACT, PLANT) # MW
 
     discountrate=0.05
 
-    return (; REGION, PLANT, HOUR, numregions, load, maxcap, assumptions)
+    return (; REGION, PLANT, HOUR, numregions, load, maxcap, assum, discountrate)
 
 end # read_input

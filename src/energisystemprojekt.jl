@@ -2,6 +2,10 @@
 # Så när ni ska använda det, så skriver ni Using energisystemprojekt i er REPL, då får ni ut det ni
 # exporterat. Se rad 9.
 
+"""
+  Runs the energy system model.
+"""
+
 module energisystemprojekt
 
 using JuMP, AxisArrays, Gurobi, UnPack
