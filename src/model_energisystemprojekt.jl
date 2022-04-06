@@ -11,7 +11,6 @@ function buildmodel(input)
     m = Model(Gurobi.Optimizer)
 
     @variables m begin
-
         Electricity[r in REGION, p in PLANT, h in HOUR]       >= 0        # MWh/h
         Capacity[r in REGION, p in PLANT]                     >= 0        # MW
     end #variables
@@ -22,19 +21,20 @@ function buildmodel(input)
         set_upper_bound(Capacity[r, p], maxcap[r, p])
     end
 
-    RunningCost[r in REGION] = sum(Electricity[r,p,h].*assumptions[p,RunCost] for p in PLANT, h in HOUR)
+    # Defining costs of the system
+    Runningcost[r in REGION] = sum(Electricity[r,p,h].*assumptions[p,RunCost] for p in PLANT, h in HOUR)
     function a(p)
         1-(1/(1+r)^assumptions[p,Lifetime])
     end
-    InvestmentCost[r in REGION] = sum(Capacity[r,p].*assumptions[p,InvestmentCost].*discountrate/a(p) for p in PLANT)
-
-    Systemcost[r in REGION] = Runningcost[r] + Investmentcost[r]
+    Investmentcost[r in REGION] = sum(Capacity[r,p].*assumptions[p,InvestmentCost].*discountrate/a(p) for p in PLANT)
+    Fuelcost[r in REGION] = sum(Electricity[r,Gas,h].*assumption[Gas,FuelCost] for h in HOUR)
+    Systemcost[r in REGION] = Runningcost[r] + Investmentcost[r] + Fuelcost[r]
 
     @constraints m begin
         Generation[r in REGION, p in PLANT, h in HOUR],
             Electricity[r, p, h] <= Capacity[r, p] # * capacity factor
 
-        SystemCost[r in REGION],
+        Systemcost[r in REGION],
             Systemcost[r] >= 0 # sum of all annualized costs
 
     end #constraints
