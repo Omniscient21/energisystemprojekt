@@ -25,8 +25,8 @@ function buildmodel(input)
         Generation[r in REGION, p in PLANT, h in HOUR],
             Electricity[r, p, h] <= Capacity[r, p] # * capacity factor
 
-        SystemCost[r in REGION],
-            Systemcost[r] >= 0 # sum of all annualized costs
+        #SystemCost[r in REGION],
+            #Systemcost[r] >= 0 # sum of all annualized costs
 
     end #constraints
 
@@ -38,6 +38,11 @@ function buildmodel(input)
     return (;m, Capacity)
 
 end # buildmodel
+
+function calculate_systemCost
+
+
+end # calculate_systemCost
 
 function calculate_generation(input)
 
