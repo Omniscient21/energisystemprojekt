@@ -22,7 +22,7 @@ function buildmodel(input)
         set_upper_bound(Capacity[r, p], maxcap[r, p])
     end
 
-    RunningCost[r in REGION] = sum(Electricity[r,p,h].*assumptions[p,RunCost] for p in PLANT, h in HOURS)
+    RunningCost[r in REGION] = sum(Electricity[r,p,h].*assumptions[p,RunCost] for p in PLANT, h in HOUR)
     function a(p)
         1-(1/(1+r)^assumptions[p,Lifetime])
     end
