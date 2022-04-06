@@ -1,7 +1,7 @@
 # I den här filen kan ni stoppa all inputdata.
 # Läs in datan ni fått som ligger på Canvas genom att använda paketen CSV och DataFrames
 
-using CSV, DataFrames
+using CSV, DataFrames, AxisArrays
 
 function read_input()
     println("\nReading Input Data...")
@@ -50,9 +50,8 @@ function read_input()
 
     maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT) # MW
 
-
     discountrate=0.05
 
-    return (; REGION, PLANT, HOUR, numregions, load, maxcap)
+    return (; REGION, PLANT, HOUR, numregions, load, maxcap, assumptions)
 
 end # read_input
