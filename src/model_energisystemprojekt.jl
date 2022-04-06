@@ -6,7 +6,7 @@ function buildmodel(input)
 
     println("\nBuilding model...")
 
-    @unpack REGION, PLANT, HOUR, numregions, load, maxcap, assum, discountrate = input
+    @unpack REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate = input
 
     m = Model(Gurobi.Optimizer)
 
@@ -22,6 +22,13 @@ function buildmodel(input)
         set_upper_bound(Capacity[r, p], maxcap[r, p])
     end
 
+    RunningCost[r in REGION] = sum(Electricity[r,p,h].*assumptions[p,RunCost] for p in PLANT, h in HOURS)
+    function a(p)
+        1-(1/(1+r)^assumptions[p,Lifetime])
+    end
+    InvestmentCost[r in REGION] = sum(Capacity[r,p].*assumptions[p,InvestmentCost].*discountrate/a(p) for p in PLANT)
+
+    Systemcost[r in REGION] = Runningcost[r] + Investmentcost[r]
 
     @constraints m begin
         Generation[r in REGION, p in PLANT, h in HOUR],
@@ -32,18 +39,11 @@ function buildmodel(input)
 
     end #constraints
 
-    RunningCost[r in REGION] = sum(Electricity[r,p,h]*assumptions[p,RunCost] for p in PLANT, h in HOURS)
-    function a(p)
-        1-(1/(1+r)^assumptions[p,5])
-    end
-    InvestmentCost[r in REGION] = sum(Capacity[r,p]*assumptions[p,InvestmentCost]*discountrate/a[p] for p in PLANT)
-    Systemcost[r in REGION] = Runningcost[r] + Investmentcost[r]
-
     @objective m Min begin
         sum(Systemcost[r] for r in REGION)
     end # objective
 
-    return (;m, Capacity)
+    return (; m, Capacity)
 
 end # buildmodel
 
