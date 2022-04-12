@@ -22,13 +22,31 @@ function buildmodel(input)
     end
 
     # Defining costs of the system
-    Runningcost[r in REGION] = sum(Electricity[r,p,h].*assumptions[p,RunCost] for p in PLANT, h in HOUR)
-    function a(p)
-        1-(1/(1+r)^assumptions[p,Lifetime])
+    Runningcost = AxisArray(Array{Float64}(undef, length(REGION)),REGION) # init
+    Investmentcost = AxisArray(Array{Float64}(undef, length(REGION)),REGION) # init
+    Systemcost = AxisArray(Array{Float64}(undef, length(REGION)),REGION) # init
+
+    function a(d,p)
+        1-(1/(1+d)^assum[:Lifetime,p])
     end
-    Investmentcost[r in REGION] = sum(Capacity[r,p].*assumptions[p,InvestmentCost].*discountrate/a(p) for p in PLANT)
-    Fuelcost[r in REGION] = sum(Electricity[r,Gas,h].*assumption[Gas,FuelCost] for h in HOUR)
-    Systemcost[r in REGION] = Runningcost[r] + Investmentcost[r] + Fuelcost[r]
+    for r in REGION
+        #print(Capacity[r,:Wind].*assum[:InvestmentCost,:Wind].*discountrate./a(discountrate,:Wind))
+
+        Investmentcost[r] = sum(Capacity[r,p] for p in PLANT) # doesn't work, wrong type
+
+        Investmentcost[r] = sum(Capacity[r,p].*assum[:InvestmentCost,p].*discountrate./a(discountrate,p) for p in PLANT)
+        Fuelcost[r] = sum(Electricity[r,Gas,h].*assum[:FuelCost,:Gas] for h in HOUR)
+    end
+    for r in REGION # when r used many times external for loop needed
+        print(Electricity[:DE,:Wind,100])
+
+        # seems to not work as Electricity[r,p,h] is not a normal float element
+        Runningcost[r] = sum(Electricity[r,p,h].*assum[:RunCost,p] for p in PLANT, h in HOUR)
+    end
+    for r in REGION
+        Systemcost[r] = Runningcost[r] + Investmentcost[r] + Fuelcost[r]
+    end
+
 
     @constraints m begin
         Generation[r in REGION, p in PLANT, h in HOUR],
@@ -48,6 +66,5 @@ function buildmodel(input)
 end # buildmodel
 
 function calculate_generation(input)
-
 
 end # calculate_generation

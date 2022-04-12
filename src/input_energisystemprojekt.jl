@@ -54,7 +54,7 @@ function read_input()
     ] #TODO: check asterisks
 
     maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT) # MW
-    assum = AxisArray(assumptions[:,2:end]', PLANTFACT, PLANT)
+    assum = AxisArray(assumptions[:,2:end]', PLANTFACT, PLANT) # ' used for matrix transpose
 
     discountrate=0.05
 
