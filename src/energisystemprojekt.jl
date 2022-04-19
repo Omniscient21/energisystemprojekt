@@ -16,7 +16,8 @@ include("input_energisystemprojekt.jl")
 include("model_energisystemprojekt.jl")
 
 function runmodel()
-
+    # TODO: kolla plotly!
+    
     input = read_input()
 
     model = buildmodel(input)
