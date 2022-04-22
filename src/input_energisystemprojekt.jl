@@ -22,12 +22,13 @@ function read_input()
     numhours = length(HOUR)
 
     timeseries = CSV.read("src/TimeSeries.csv", DataFrame)
+
     wind_cf = AxisArray(ones(numregions, numhours), REGION, HOUR)
     load = AxisArray(zeros(numregions, numhours), REGION, HOUR)
 
         for r in REGION
-            wind_cf[r, :]=timeseries[:, "Wind_"*"$r"]                                                        # 0-1, share of installed cap
-            load[r, :]=timeseries[:, "Load_"*"$r"]                                                           # [MWh]
+            wind_cf[r, :]=timeseries[:, "Wind_"*"$r"]             # 0-1, share of installed cap
+            load[r, :]=timeseries[:, "Load_"*"$r"]                # [MWh]
         end
 
     myinf = 1e8

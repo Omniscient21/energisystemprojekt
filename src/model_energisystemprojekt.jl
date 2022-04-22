@@ -25,7 +25,7 @@ function buildmodel(input)
         1-(1/(1+d)^assum[:Lifetime,p])
     end
 
-    # test expression TODO: control all expressions
+    # test expression TODO: check all expressions, r in REGION?
     @expression(m, Runningcost[r = REGION], sum(Electricity[r,p,h].*assum[:RunCost,p] for p in PLANT, h in HOUR))
     @expression(m, Investmentcost[r = REGION], sum(Capacity[r,p].*assum[:InvestmentCost,p].*discountrate./a(discountrate,p) for p in PLANT))
     @expression(m, Fuelcost[r = REGION], sum(Electricity[r,:Gas,h].*assum[:FuelCost,:Gas] for h in HOUR))
@@ -58,11 +58,14 @@ function buildmodel(input)
     # end
 
     @constraints m begin
-        Generation[r in REGION, p in PLANT, h in HOUR], # name of constraint?
+        Generation[r in REGION, p in PLANT, h in HOUR], # name of constraint
             Electricity[r, p, h] <= Capacity[r, p] # * capacity factor
 
-        Syscost[r in REGION], # name of constraint?
+        Syscost[r in REGION], # name of constraint
             Systemcost[r] >= 0 # sum of all annualized costs
+
+        CapacityConstraints[r in REGION, p in PLANT],
+            Capacity[r, p] <= maxcap[r,p] # TODO: same for hydro?
 
     end #constraints
 
