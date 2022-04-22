@@ -6,7 +6,7 @@ function buildmodel(input)
 
     println("\nBuilding model...")
 
-    @unpack REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate, wind_cf, pv_cf, hydro_inflow = input
+    @unpack REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate, cf, hydro_inflow = input
 
     m = Model(Gurobi.Optimizer)
 
@@ -33,15 +33,17 @@ function buildmodel(input)
 
     @expression(m, GeneratedElectricity[r in REGION, h = HOUR], sum(Electricity[r,p,h] for p in PLANT))
 
+    @expression(m, CapacityPerHour[r in REGION, p in PLANT, h in HOUR], sum(InstalledCapacity[r, p].*cf[r, p, h]))
+
     # @expression(m, CapacityPerHour[r in REGION, p in PLANT, h in HOUR], 0)
     # add_to_expression!(CapacityPerHour[r = REGION, p = [:Wind, :PV], h = HOUR], #TODO:
     #     InstalledCapacity[r, p]
     # )
     # add_to_expression!(CapacityPerHour[r in REGION, p = :Wind, h in HOUR],
-    #     sum(InstalledCapacity[r, p].*wind_ch[r, h])
+    #     sum(InstalledCapacity[r, p].*wind_cf[r, h])
     # )
     # add_to_expression!(CapacityPerHour[r in REGION, p = :PV, h in HOUR],
-    #     sum(InstalledCapacity[r, p].*pv_ch[r, h])
+    #     sum(InstalledCapacity[r, p].*pv_cf[r, h])
     # )
 
     @expression(m, HydroReservoirNet, sum(hydro_inflow[h] for h in HOUR) - sum(Electricity[:SE, :Hydro, h] for h in HOUR))
@@ -59,8 +61,8 @@ function buildmodel(input)
         GenElec[r in REGION, h in HOUR],
             GeneratedElectricity[r, h] >= load[r, h]
 
-        #HydroReservoir,
-        #    HydroReservoirNet = 0
+        HydroReservoir,
+            HydroReservoirNet == 0
 
     end #constraints
 

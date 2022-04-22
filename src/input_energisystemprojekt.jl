@@ -17,6 +17,7 @@ function read_input()
     #Parameters
     numregions = length(REGION)
     numhours = length(HOUR)
+    numplants = length(PLANT)
 
     timeseries = CSV.read("src/TimeSeries.csv", DataFrame)
 
@@ -30,6 +31,22 @@ function read_input()
         pv_cf[r, :]=timeseries[:, "PV_"*"$r"]                 # 0-1, share of installed cap
 
         load[r, :]=timeseries[:, "Load_"*"$r"]                # [MWh]
+    end
+
+    #cf = AxisArray([wind_cf,pv_cf,ones(numregions, numhours), , REGION, HOUR, PLANT)
+    # cf = AbstractArray([
+    #     wind_cf
+    #     pv_cf
+    #     AxisArray(ones(numregions, numhours), REGION, HOUR)
+    #     AxisArray(ones(numregions, numhours), REGION, HOUR)
+    #     #AxisArray(ones(numregions, numhours), REGION, HOUR)
+    #     #AxisArray(ones(numregions, numhours), REGION, HOUR)
+    #     #AxisArray(ones(numregions, numhours), REGION, HOUR)
+    # ], REGION, HOUR, PLANT)
+
+    cf = AxisArray(ones(numregions, numplants, numhours), REGION, PLANT, HOUR)
+    for p in [:Wind, :PV], r in REGION
+        cf[r, p, :] = timeseries[:, "$p"*"_"*"$r"]
     end
 
     hydro_inflow = AxisArray(zeros(numhours), HOUR) # TODO: only for SE?
@@ -65,6 +82,6 @@ function read_input()
 
     discountrate=0.05
 
-    return (; REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate, wind_cf, pv_cf, hydro_inflow)
+    return (; REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate, cf, hydro_inflow)
 
 end # read_input
