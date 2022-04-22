@@ -4,7 +4,7 @@
 
 module energisystemprojekt
 
-using JuMP, AxisArrays, Gurobi, UnPack, #Plots
+using JuMP, AxisArrays, Gurobi, UnPack#, Plots
 
 export runmodel
 
@@ -18,7 +18,7 @@ function runmodel()
 
     model = buildmodel(input)
 
-    @unpack m, Capacity = model
+    @unpack m, InstalledCapacity, Electricity = model
 
     println("\nSolving model...")
 
@@ -34,7 +34,7 @@ function runmodel()
     end
 
     Cost_result = objective_value(m)/1000000 # M€
-    Capacity_result = value.(Capacity)
+    Capacity_result = value.(InstalledCapacity)
 
 
     println("Cost (M€): ", Cost_result)

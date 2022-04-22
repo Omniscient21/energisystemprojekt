@@ -30,7 +30,8 @@ function buildmodel(input)
     @expression(m, Investmentcost[r in REGION], sum(InstalledCapacity[r,p].*assum[:InvestmentCost,p].*discountrate./a(discountrate,p) for p in PLANT))
     @expression(m, Fuelcost[r in REGION], sum(Electricity[r,:Gas,h].*assum[:FuelCost,:Gas] for h in HOUR))
     @expression(m, Systemcost[r in REGION], Runningcost[r] + Investmentcost[r] + Fuelcost[r])
-    @expression(m, GeneratedElectricity[r in REGION, h = HOUR], sum(Electricity[r,p,h]) for p in PLANT)
+
+    @expression(m, GeneratedElectricity[r in REGION, h = HOUR], sum(Electricity[r,p,h] for p in PLANT))
 
     # @expression(m, CapacityPerHour[r in REGION, p in PLANT, h in HOUR], 0)
     # add_to_expression!(CapacityPerHour[r = REGION, p = [:Wind, :PV], h = HOUR], #TODO:
@@ -42,8 +43,6 @@ function buildmodel(input)
     # add_to_expression!(CapacityPerHour[r in REGION, p = :PV, h in HOUR],
     #     sum(InstalledCapacity[r, p].*pv_ch[r, h])
     # )
-
-    @expression(m, GeneratedElectricity[r in REGION, h in HOUR], sum(Electricity[r, p, h] for p in PLANT))
 
     @expression(m, HydroReservoirNet, sum(hydro_inflow[h] for h in HOUR) - sum(Electricity[:SE, :Hydro, h] for h in HOUR))
 
@@ -60,8 +59,8 @@ function buildmodel(input)
         GenElec[r in REGION, h in HOUR],
             GeneratedElectricity[r, h] >= load[r, h]
 
-        HydroReservoir[r in REGION, h in HOUR],
-            HydroReservoirNet = 0
+        #HydroReservoir,
+        #    HydroReservoirNet = 0
 
     end #constraints
 
