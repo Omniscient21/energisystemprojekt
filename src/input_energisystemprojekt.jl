@@ -1,6 +1,3 @@
-# I den här filen kan ni stoppa all inputdata.
-# Läs in datan ni fått som ligger på Canvas genom att använda paketen CSV och DataFrames
-
 """
   Manages all input data for the energy stystem.
 """
@@ -23,13 +20,22 @@ function read_input()
 
     timeseries = CSV.read("src/TimeSeries.csv", DataFrame)
 
-    wind_cf = AxisArray(ones(numregions, numhours), REGION, HOUR)
+    wind_cf = AxisArray(ones(numregions, numhours), REGION, HOUR) # cf = capacity fraction
+    pv_cf = AxisArray(ones(numregions, numhours), REGION, HOUR)
+
     load = AxisArray(zeros(numregions, numhours), REGION, HOUR)
 
-        for r in REGION
-            wind_cf[r, :]=timeseries[:, "Wind_"*"$r"]             # 0-1, share of installed cap
-            load[r, :]=timeseries[:, "Load_"*"$r"]                # [MWh]
-        end
+    for r in REGION
+        wind_cf[r, :]=timeseries[:, "Wind_"*"$r"]             # 0-1, share of installed cap
+        pv_cf[r, :]=timeseries[:, "PV_"*"$r"]                 # 0-1, share of installed cap
+
+        load[r, :]=timeseries[:, "Load_"*"$r"]                # [MWh]
+    end
+
+    hydro_inflow = AxisArray(zeros(numhours), HOUR) # TODO: only for SE?
+    hydro_inflow = timeseries[:, "Hydro_inflow"]
+
+    #println(pv_cf[:, 1:3])
 
     myinf = 1e8
     maxcaptable = [ # GW
@@ -54,11 +60,11 @@ function read_input()
         #:Nuclear        7700        4           3.2         50          0.4         0
     ] #TODO: check asterisks
 
-    maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT) # MW
-    assum = AxisArray(assumptions[:,2:end]', PLANTFACT, PLANT) # ' used for matrix transpose
+    maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT)      # MW
+    assum = AxisArray(assumptions[:,2:end]', PLANTFACT, PLANT)          # ' used for matrix transpose
 
     discountrate=0.05
 
-    return (; REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate)
+    return (; REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate, wind_cf, pv_cf, hydro_inflow)
 
 end # read_input

@@ -1,14 +1,10 @@
-# I den här filen bygger ni modellen. Notera att det är skrivet som en modul, dvs ett paket.
-# Så när ni ska använda det, så skriver ni Using energisystemprojekt i er REPL, då får ni ut det ni
-# exporterat. Se rad 9.
-
 """
   Runs the energy system model.
 """
 
 module energisystemprojekt
 
-using JuMP, AxisArrays, Gurobi, UnPack
+using JuMP, AxisArrays, Gurobi, UnPack, #Plots
 
 export runmodel
 
@@ -17,7 +13,7 @@ include("model_energisystemprojekt.jl")
 
 function runmodel()
     # TODO: kolla plotly!
-    
+
     input = read_input()
 
     model = buildmodel(input)
@@ -42,6 +38,10 @@ function runmodel()
 
 
     println("Cost (M€): ", Cost_result)
+
+    #InstalledCapacity_vector =
+    #plot(InstalledCapacity_vector, title = "Installed Capacity", label=["Installed Capacity"])
+    #plot(Generators_vector, title = "Domestic generators in Germany", label=["Domestic generators in Germany"])
 
     nothing
 
