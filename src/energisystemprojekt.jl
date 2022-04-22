@@ -18,7 +18,7 @@ function runmodel()
 
     model = buildmodel(input)
 
-    @unpack m, InstalledCapacity, Electricity = model
+    @unpack m, InstalledCapacity, Electricity, CO2emission = model
 
     println("\nSolving model...")
 
@@ -33,20 +33,31 @@ function runmodel()
         error("The model was not solved correctly.")
     end
 
-    Cost_result = objective_value(m)/1000000 # M€
+    Cost_result = objective_value(m)/1000000 # €->M€
     Capacity_result = value.(InstalledCapacity)
+    Emission_result = value.(CO2emission)/(10^6) # ton CO2 -> Mton CO2
 
 
     println("Cost (M€): ", Cost_result)
+    println("CO2 Emission (Mton): ", Emission_result)
 
-    #InstalledCapacity_vector =
-    #plot(InstalledCapacity_vector, title = "Installed Capacity", label=["Installed Capacity"])
+    #append!(InstalledCapacities, InstalledCapacity(m))
+    #@unpack REGION, PLANT, numregions = input
+    #InstalledCapacity_vector = AxisArray(zeros(numregions), REGION)
+    #for r in REGION
+    #    InstalledCapacity_vector[r] = sum(InstalledCapacities[r, p] for p in PLANT)
+    #end
+
+    #x_axis = 1:4
+    #AnnualProduktion =
+    #plot(REGION, InstalledCapacity_vector[:, p in PLANT], title = "Installed Capacity", label=["Installed Capacity"])
     #plot(Generators_vector, title = "Domestic generators in Germany", label=["Domestic generators in Germany"])
 
     nothing
 
-    # E1 total cost: 37238 [M€], 66305, 49121, 43619
-    # Emissions: 139 [Mton], 13.9,
+    #Exercise:      1,         2      3      4
+    # Total cost: 37238 [M€], 66305, 49121, 43619
+    # Emissions: 139 [Mton], 13.9 for E2,3,4
 
 end #runmodel
 
