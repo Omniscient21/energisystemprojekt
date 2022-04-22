@@ -13,6 +13,8 @@ function buildmodel(input)
     @variables m begin
         Electricity[r in REGION, p in PLANT, h in HOUR]       >= 0        # MWh/h
         InstalledCapacity[r in REGION, p in PLANT]            >= 0        # MW
+        ReservoirContent[h in HOUR]                           >= 0        # TWh
+
     end #variables
     #print(Capacity)
 
@@ -46,11 +48,11 @@ function buildmodel(input)
     #     sum(InstalledCapacity[r, p].*pv_cf[r, h])
     # )
 
-    @expression(m, HydroReservoirNet, sum(hydro_inflow[h] for h in HOUR) - sum(Electricity[:SE, :Hydro, h] for h in HOUR))
+    #@expression(m, HydroReservoirNet, sum(hydro_inflow[h] for h in HOUR) - sum(Electricity[:SE, :Hydro, h] for h in HOUR))
 
     @constraints m begin
-        #Generation[r in REGION, p in PLANT, h in HOUR], # name of constraint
-        #    Electricity[r, p, h] <= CapacityPerHour[r, p, h] # * capacity factor
+        Generation[r in REGION, p in PLANT, h in HOUR], # name of constraint
+            Electricity[r, p, h] <= CapacityPerHour[r, p, h] # * capacity factor
 
         Syscost[r in REGION], # name of constraint
             Systemcost[r] >= 0 # sum of all annualized costs
@@ -61,8 +63,14 @@ function buildmodel(input)
         GenElec[r in REGION, h in HOUR],
             GeneratedElectricity[r, h] >= load[r, h]
 
-        HydroReservoir,
-            HydroReservoirNet == 0
+        #HydroReservoir,
+        #    HydroReservoirNet == 0
+
+        ReservoirBalance[h in HOUR[2:end]],
+            ReservoirContent[h] <= ReservoirContent[h-1] + hydro_inflow[h] - Electricity[:SE, :Hydro, h]
+
+        ReservoirLimit[h in HOUR],
+            ReservoirContent[h] <= 33
 
     end #constraints
 

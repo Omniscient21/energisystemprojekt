@@ -45,6 +45,9 @@ function runmodel()
 
     nothing
 
+    # E1 total cost: 37238 [M€], 66305, 49121, 43619
+    # Emissions: 139 [Mton], 13.9,
+
 end #runmodel
 
 end # module

@@ -50,7 +50,7 @@ function read_input()
     end
 
     hydro_inflow = AxisArray(zeros(numhours), HOUR) # TODO: only for SE?
-    hydro_inflow = timeseries[:, "Hydro_inflow"]
+    hydro_inflow = timeseries[:, "Hydro_inflow"] # MWh
 
     #println(pv_cf[:, 1:3])
 
@@ -70,7 +70,7 @@ function read_input()
         # Plant      Inv. cost   Run. cost  Fuel cost   Lifetime    Efficiency  Em. factor
         :Wind           1100        0.1         0           25          0           0
         :PV             600         0.1         0           25          0           0
-        :Gas            550         2           22          30          0.4         0.202
+        :Gas            550         2           22/0.4      30          0.4         0.202 # TODO: check fuel cost
         :Hydro          0           0.1         0           80          0           0
         #:Batteries      150         0.1         0           10          0.9         0
         #:Transmission   2500        0           0           50          0.98        0
