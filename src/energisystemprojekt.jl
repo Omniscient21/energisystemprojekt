@@ -19,6 +19,7 @@ function runmodel()
     model = buildmodel(input)
 
     @unpack m, InstalledCapacity, Electricity, CO2emission = model
+    @unpack REGION, PLANT, HOUR, numregions = input
 
     println("\nSolving model...")
 
@@ -37,26 +38,35 @@ function runmodel()
     Capacity_result = value.(InstalledCapacity)
     Emission_result = value.(CO2emission) # Mton CO2
 
-
     println("Cost (M€): ", Cost_result)
-    println("Capacity (MW): ", Capacity_result)
+    #println("Capacity (MW): ", Capacity_result)
     println("CO2 Emission (Mton): ", Emission_result)
 
 
-    @unpack REGION, PLANT, numregions = input
-    InstalledCapacity_vector = AxisArray(zeros(numregions), REGION)
+    # Calculates and prints installed capacity in each region
+    RegionalCapacity = AxisArray(zeros(numregions), REGION)
     for r in REGION
-       InstalledCapacity_vector[r] = sum(value.(InstalledCapacity[r, p]) for p in PLANT)
+       RegionalCapacity[r] = sum(value.(InstalledCapacity[r, p]) for p in PLANT)
     end
-    println(InstalledCapacity_vector)
+    println("Regional Capacity (MW): ", RegionalCapacity)
 
-    #df = dataset(DataFrame, "Installed Capacities")
-    #long_df = stack(df, Not([:REGION]), variable_name="medal", value_name="count")
-    #plot(df, kind="bar", x=:REGION, Layout(title="Installed Capacities"), kind="bar")
 
-    df = DataFrame(A=InstalledCapacity_vector, B=[:Denmark, :Sweden, :Germany])
+    # Calculates and prints total annual produktion in each region
+    AnnualProduktion = AxisArray(zeros(numregions), REGION)
+    for r in REGION
+       AnnualProduktion[r] = sum(value.(Electricity[r, p, h]) for p in PLANT, for h in HOUR)
+    end
+    println("CO2 Emission (Mton): ", AnnualProduktion)
+
+    # Plots the installed capacity
+    df = DataFrame(capacity=RegionalCapacity, country=[:Denmark, :Sweden, :Germany])
     println(df)
-    plot(df, x=df.B, y = df.A, kind = "bar", Layout(title="Installed Capacities"))
+    plot(df, x=df.capacity, y=df.country, kind = "bar", Layout(title="Installed Capacities"), layout = 2)
+
+    # Plots the total annual produktion
+    # df = DataFrame(A=[AnnualProduktion], B=[:Denmark, :Sweden, :Germany])
+    # println(df)
+    # plot(df, x=df.B, y=df.A, kind = "bar", Layout(title="Annual produktion"))
 
 
 
