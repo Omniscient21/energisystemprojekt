@@ -54,7 +54,7 @@ function runmodel()
     #long_df = stack(df, Not([:REGION]), variable_name="medal", value_name="count")
     #plot(df, kind="bar", x=:REGION, Layout(title="Installed Capacities"), kind="bar")
 
-    df = DataFrame(A=InstalledCapacity_vector, B=REGION)
+    df = DataFrame(A=InstalledCapacity_vector, B=[:Denmark, :Sweden, :Germany])
     println(df)
     plot(df, x=df.B, y = df.A, kind = "bar", Layout(title="Installed Capacities"))
 
