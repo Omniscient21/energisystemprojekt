@@ -46,7 +46,6 @@ function buildmodel(input)
     # only gas has emission factor > 0
     @expression(m, Emission, sum(Electricity[r, p, h]./assum[:Efficiency, p].*assum[:EmissionFactor, p] for r in REGION, p in PLANT, h in HOUR)./(10^6)) # Mton CO2
 
-    @expression(m, BatteryStorage)
     #@expression(m, HydroReservoirNet, sum(hydro_inflow[h] for h in HOUR) - sum(Electricity[:SE, :Hydro, h] for h in HOUR))
 
     @constraints m begin

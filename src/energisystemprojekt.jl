@@ -4,7 +4,7 @@
 
 module energisystemprojekt
 
-using JuMP, AxisArrays, Gurobi, UnPack#, Plots
+using JuMP, AxisArrays, Gurobi, UnPack, PlotlyJS, CSV, DataFrames
 
 export runmodel
 
@@ -39,25 +39,37 @@ function runmodel()
 
 
     println("Cost (M€): ", Cost_result)
+    println("Capacity (MW): ", Capacity_result)
     println("CO2 Emission (Mton): ", Emission_result)
 
-    #append!(InstalledCapacities, InstalledCapacity(m))
-    #@unpack REGION, PLANT, numregions = input
-    #InstalledCapacity_vector = AxisArray(zeros(numregions), REGION)
-    #for r in REGION
-    #    InstalledCapacity_vector[r] = sum(InstalledCapacities[r, p] for p in PLANT)
-    #end
 
-    #x_axis = 1:4
-    #AnnualProduktion =
-    #plot(REGION, InstalledCapacity_vector[:, p in PLANT], title = "Installed Capacity", label=["Installed Capacity"])
-    #plot(Generators_vector, title = "Domestic generators in Germany", label=["Domestic generators in Germany"])
+    @unpack REGION, PLANT, numregions = input
+    InstalledCapacity_vector = AxisArray(zeros(numregions), REGION)
+    for r in REGION
+       InstalledCapacity_vector[r] = sum(value.(InstalledCapacity[r, p]) for p in PLANT)
+    end
+    println(InstalledCapacity_vector)
+
+    #df = dataset(DataFrame, "Installed Capacities")
+    #long_df = stack(df, Not([:REGION]), variable_name="medal", value_name="count")
+    #plot(df, kind="bar", x=:REGION, Layout(title="Installed Capacities"), kind="bar")
+
+    df = DataFrame(A=InstalledCapacity_vector, B=REGION)
+    println(df)
+    plot(df, x=df.B, y = df.A, kind = "bar", Layout(title="Installed Capacities"))
+
+
+
+    # x_axis = 1:4
+    # AnnualProduktion =
+    # plot(REGION, InstalledCapacity_vector[:, p in PLANT], title = "Installed Capacity", label=["Installed Capacity"])
+    # plot(Generators_vector, title = "Domestic generators in Germany", label=["Domestic generators in Germany"])
 
     nothing
 
-    #Exercise:      1,         2      3      4
-    # Total cost: 37238 [M€], 66305, 49121, 43619
-    # Emissions: 139 [Mton], 13.9 for E2,3,4
+    #Exercise:      1,     2      3      4
+    # Total cost: 37238, 66305, 49121, 43619  [M€]
+    # Emissions:   139,   13.9,  13.9   13.9 [Mton]
 
 end #runmodel
 
