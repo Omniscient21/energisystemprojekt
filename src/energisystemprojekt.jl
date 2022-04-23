@@ -35,7 +35,7 @@ function runmodel()
 
     Cost_result = objective_value(m)/1000000 # €->M€
     Capacity_result = value.(InstalledCapacity)
-    Emission_result = value.(CO2emission)/(10^6) # ton CO2 -> Mton CO2
+    Emission_result = value.(CO2emission) # Mton CO2
 
 
     println("Cost (M€): ", Cost_result)

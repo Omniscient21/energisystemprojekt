@@ -34,12 +34,10 @@ function read_input()
     end
 
 
-    cf = AxisArray(ones(numregions, numplants, numhours), REGION, PLANT, HOUR) # cf = capacity fraction
+    cf = AxisArray(ones(numregions, numplants, numhours), REGION, PLANT, HOUR) # cf = capacity fraction, 1 for most plants
     for p in [:Wind, :PV], r in REGION
         cf[r, p, :] = timeseries[:, "$p"*"_"*"$r"] # 0-1, share of installed cap
     end
-
-    println(cf[1:3,1:3,1:3])
 
     hydro_inflow = AxisArray(zeros(numhours), HOUR)
     hydro_inflow = timeseries[:, "Hydro_inflow"]./(10^6) # MWh->TWh
