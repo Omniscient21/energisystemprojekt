@@ -70,6 +70,6 @@ function read_input()
 
     discountrate=0.05
 
-    return (; REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate, cf, hydro_inflow)
+    return (; REGION, PLANT, PLANTFACT, HOUR, numregions, numplants, load, maxcap, assum, discountrate, cf, hydro_inflow)
 
 end # read_input

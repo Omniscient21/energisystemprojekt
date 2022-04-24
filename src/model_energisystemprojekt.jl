@@ -92,7 +92,7 @@ function buildmodel(input)
         sum(Systemcost[r] for r in REGION)
     end # objective
 
-    return (; m, InstalledCapacity, Electricity, CO2emission)
+    return (; m, InstalledCapacity, Electricity, CO2emission, GeneratedElectricity)
 
 end # buildmodel
 
