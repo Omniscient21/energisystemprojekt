@@ -18,7 +18,7 @@ function runmodel()
 
     model = buildmodel(input)
 
-    @unpack m, InstalledCapacity, Electricity, CO2emission, GeneratedElectricity = model
+    @unpack m, InstalledCapacity, Electricity, Emission, GeneratedElectricity = model
     @unpack REGION, PLANT, HOUR, numregions, numplants = input
 
     println("\nSolving model...")
@@ -41,9 +41,9 @@ function runmodel()
        RegionalCapacity[r] = sum(value.(InstalledCapacity[r, p]) for p in PLANT)
     end
     # Calculates annual produktion in each region
-    AnnualProduktion = AxisArray(zeros(numregions), REGION)
+    AnnualProduction = AxisArray(zeros(numregions), REGION)
     for r in REGION
-       AnnualProduktion[r] = sum(value.(GeneratedElectricity[r, h]) for h in HOUR)
+       AnnualProduction[r] = sum(value.(GeneratedElectricity[r, h]) for h in HOUR)
     end
     # Production in Germany hour 147-651
     GermanyGenerators = AxisArray(zeros(651-147+1), 147:651)
@@ -53,41 +53,31 @@ function runmodel()
 
     Cost_result = objective_value(m)/1000000 # €->M€
     Capacity_result = value.(InstalledCapacity)
-    Emission_result = value.(CO2emission) # Mton CO2
+    Emission_result = value.(Emission) # Mton CO2
 
     println("Cost (M€): ", Cost_result)
-    #println("Capacity (MW): ", Capacity_result)
+    println("Capacity (MW): ", Capacity_result)
     println("CO2 Emission (Mton): ", Emission_result)
-    println("CO2 Emission (Mton): ", AnnualProduktion)
+    println("Annual production (MWh): ", AnnualProduction)
     println("Regional Capacity (MW): ", RegionalCapacity)
-    println("Produktion in Germany (MW): ", GermanyGenerators)
+    #println("Produktion in Germany (MW): ", GermanyGenerators)
 
     # Plots:
     dfInstalledCapacities = DataFrame(A=RegionalCapacity, B=[:Germany, :Sweden, :Denmark])
-    display(plot(dfInstalledCapacities, x=dfInstalledCapacities.B, y = dfInstalledCapacities.A, kind = "bar", Layout(title="Installed Capacities (MW)")))
+    plot_InstalledCapacities() = plot(dfInstalledCapacities, x=dfInstalledCapacities.B, y = dfInstalledCapacities.A, kind = "bar", Layout(title="Installed Capacities (MW)"))
 
-    dfGeneratedElectricity = DataFrame(A=AnnualProduction_vector, B=[:Germany, :Sweden, :Denmark])
-    display(plot(dfGeneratedElectricity, x=dfGeneratedElectricity.B, y = df.A, kind = "bar", Layout(title="Annual Production (MWh)")))
+    dfGeneratedElectricity = DataFrame(A=AnnualProduction, B=[:Germany, :Sweden, :Denmark])
+    plot_GeneratedElectricity() = plot(dfGeneratedElectricity, x=dfGeneratedElectricity.B, y = dfGeneratedElectricity.A, kind = "bar", Layout(title="Annual Production (MWh)"))
 
     dfGermanyGenerators = DataFrame(A=GermanyGenerators, B=147:651)
-    display(plot(dfGermanyGenerators, x=dfGermanyGenerators.B, y = dfGermanyGenerators.A, kind="scatter", mode="lines", Layout(title="Production in Germany hour 147-651 (MW)")))
+    plot_GermanyGenerators() = plot(dfGermanyGenerators, x=dfGermanyGenerators.B, y = dfGermanyGenerators.A, kind="scatter", mode="lines", Layout(title="Production in Germany hour 147-651 (MW)"))
+
+    p = [plot_InstalledCapacities(); plot_GeneratedElectricity(); plot_GermanyGenerators()]
+    relayout!(p, title_text="Exercise 1 plots")
+    display(p)
 
 
 
-
-
-
-    # Plots the total annual produktion
-    # df = DataFrame(A=[AnnualProduktion], B=[:Denmark, :Sweden, :Germany])
-    # println(df)
-    # plot(df, x=df.B, y=df.A, kind = "bar", Layout(title="Annual produktion"))
-
-
-
-    # x_axis = 1:4
-    # AnnualProduktion =
-    # plot(REGION, InstalledCapacity_vector[:, p in PLANT], title = "Installed Capacity", label=["Installed Capacity"])
-    # plot(Generators_vector, title = "Domestic generators in Germany", label=["Domestic generators in Germany"])
 
     nothing
 

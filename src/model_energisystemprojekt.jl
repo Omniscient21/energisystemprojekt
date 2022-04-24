@@ -14,11 +14,11 @@ function buildmodel(input)
         Electricity[r in REGION, p in PLANT, h in HOUR]       >= 0        # MW TODO: MWh?
         InstalledCapacity[r in REGION, p in PLANT]            >= 0        # MW
         ReservoirContent[h in HOUR]                           >= 0        # TWh
-        CO2emission                                           >= 0        # Mton
+        Emission                                              >= 0        # Mton
 
         # Exercise 2
-        # BatteryStorage[r in REGION, h in HOUR]                >= 0        # MWh / MW
-        # BatteryInput[r in REGION, h in HOUR]                  >= 0        # MW
+        BatteryStorage[r in REGION, h in HOUR]                >= 0        # MWh / MW
+        BatteryInput[r in REGION, h in HOUR]                  >= 0        # MW
     end #variables
     #print(Capacity)
 
@@ -44,7 +44,7 @@ function buildmodel(input)
     @expression(m, CapacityPerHour[r in REGION, p in PLANT, h in HOUR], sum(InstalledCapacity[r, p].*cf[r, p, h])) # MW
 
     # only gas has emission factor > 0
-    @expression(m, Emission, sum(Electricity[r, p, h]./assum[:Efficiency, p].*assum[:EmissionFactor, p] for r in REGION, p in PLANT, h in HOUR)./(10^6)) # Mton CO2
+    #@expression(m, Emission, sum(Electricity[r, :Gas, h]./assum[:Efficiency, :Gas].*assum[:EmissionFactor, :Gas] for r in REGION, h in HOUR)./(10^6)) # Mton CO2
 
     #@expression(m, HydroReservoirNet, sum(hydro_inflow[h] for h in HOUR) - sum(Electricity[:SE, :Hydro, h] for h in HOUR))
 
@@ -70,21 +70,25 @@ function buildmodel(input)
         ReservoirLimit[h in HOUR],
             ReservoirContent[h] <= 33 # TWh
 
-        EmissionConstraint,
-            CO2emission == Emission
+        #EmissionConstraint,
+        #    CO2emission >= Emission
 
-        #Exercise 2
-        #MaxEmission,
-        #    Emission <= 14.2 # TODO: change if find fault with exercise 1
+        #Exercise 2:
+        MinEmission,
+            Emission >= sum((Electricity[r, :Gas, h]./assum[:Efficiency, :Gas]).*assum[:EmissionFactor, :Gas] for r in REGION, h in HOUR)./(10^6)
 
-        # BatteryBalance[r in REGION, h in HOUR[1:end-1]],
-        #     BatteryContent[r, h+1] <= BatteryContent[h] - Electricity[r, :Batteries, h]./assum[:Efficiency, :Batteries] + BatteryInput[r, h] #TODO: h-1 correct?
-        #
-        # BatteryInputBound[r in Region, h in HOUR],
-        #     BatteryInput[r, h] <= sum(Electricity[r,p,h] for p in PLANT) # can get input from batteries, but would be inefficient
-        #
-        # BatteryMax[r in REGION, h in HOUR],
-        #     BatteryContent[r, h] <= InstalledCapacity[r, :Batteries]
+        MaxEmission,
+            Emission <= 30
+
+
+        BatteryBalance[r in REGION, h in HOUR[1:end-1]],
+            BatteryContent[r, h+1] <= BatteryContent[h] - Electricity[r, :Batteries, h]./assum[:Efficiency, :Batteries] + BatteryInput[r, h] #TODO: h-1 correct?
+
+        BatteryInputBound[r in Region, h in HOUR],
+            BatteryInput[r, h] <= sum(Electricity[r,p,h] for p in PLANT) # can get input from batteries, but would be inefficient
+
+        BatteryMax[r in REGION, h in HOUR],
+            BatteryContent[r, h] <= InstalledCapacity[r, :Batteries]
 
     end #constraints
 
@@ -92,7 +96,7 @@ function buildmodel(input)
         sum(Systemcost[r] for r in REGION)
     end # objective
 
-    return (; m, InstalledCapacity, Electricity, CO2emission, GeneratedElectricity)
+    return (; m, InstalledCapacity, Electricity, Emission, GeneratedElectricity)
 
 end # buildmodel
 

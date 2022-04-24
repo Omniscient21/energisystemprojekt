@@ -33,7 +33,6 @@ function read_input()
         load[r, :]=timeseries[:, "Load_"*"$r"]                # [MWh]
     end
 
-
     cf = AxisArray(ones(numregions, numplants, numhours), REGION, PLANT, HOUR) # cf = capacity fraction, 1 for most plants
     for p in [:Wind, :PV], r in REGION
         cf[r, p, :] = timeseries[:, "$p"*"_"*"$r"] # 0-1, share of installed cap
@@ -45,10 +44,10 @@ function read_input()
     myinf = 1e8
     maxcaptable = [ # GW
             # PLANT       DE             SE              DK
-            :Wind         280            90              180
-            :PV           75             60              460
+            :Wind         180            280              90 # TODO: change back into correct values
+            :PV           460             75              60
             :Gas          myinf          myinf           myinf
-            :Hydro        0              14              0
+            :Hydro        0               14               0
             #:Batteries    myinf          myinf           myinf
             #:Transmission myinf          myinf           myinf
             #:Nuclear      myinf          myinf           myinf
