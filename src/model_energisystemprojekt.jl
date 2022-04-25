@@ -19,6 +19,9 @@ function buildmodel(input)
         # Exercise 2
         BatteryContent[r in REGION, h in HOUR]                >= 0        # MWh / MW
         BatteryInput[r in REGION, h in HOUR]                  >= 0        # MW
+
+        # Exercise 3
+        Transmission[r in REGION, r in REGION, h in HOUR]     >= 0
     end #variables
     #print(Capacity)
 
@@ -39,7 +42,8 @@ function buildmodel(input)
     @expression(m, Systemcost[r in REGION], Runningcost[r] + Investmentcost[r] + Fuelcost[r]) # €
 
     @expression(m, GeneratedElectricity[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)) # MW
-    @expression(m, GeneratedElectricityNet[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])
+    #@expression(m, GeneratedElectricityNet[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])
+    @expression(m, GeneratedElectricityNet[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])+sum(Transmission[r, R, h] for R in REGION, h in HOUR)
 
     @expression(m, CapacityPerHour[r in REGION, p in PLANT, h in HOUR], sum(InstalledCapacity[r, p].*cf[r, p, h])) # MW
 
@@ -80,17 +84,20 @@ function buildmodel(input)
             Emission >= sum((Electricity[r, :Gas, h]./assum[:Efficiency, :Gas]).*assum[:EmissionFactor, :Gas] for r in REGION, h in HOUR)./(10^6)
 
         MaxEmission,
-            Emission <= 70 #Mton CO2
+            Emission <= 13.9 #Mton CO2
 
 
         BatteryBalance[r in REGION, h in HOUR[1:end-1]],
             BatteryContent[r, h+1] <= BatteryContent[r, h] - Electricity[r, :Batteries, h]./assum[:Efficiency, :Batteries] + BatteryInput[r, h] #TODO: h-1 correct?
 
-        BatteryInputMax[r in Region, h in HOUR],
+        BatteryInputMax[r in REGION, h in HOUR],
             BatteryInput[r, h] <= sum(Electricity[r,p,h] for p in PLANT) # can get input from batteries, but would be inefficient
 
         BatteryMax[r in REGION, h in HOUR],
             BatteryContent[r, h] <= InstalledCapacity[r, :Batteries]
+
+        #Exercise 3 TODO: transmission constraints
+        
 
     end #constraints
 

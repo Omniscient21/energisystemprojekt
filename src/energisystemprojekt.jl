@@ -73,12 +73,8 @@ function runmodel()
     plot_GermanyGenerators() = plot(dfGermanyGenerators, x=dfGermanyGenerators.B, y = dfGermanyGenerators.A, kind="scatter", mode="lines", Layout(title="Production in Germany hour 147-651 (MW)"))
 
     p = [plot_InstalledCapacities(); plot_GeneratedElectricity(); plot_GermanyGenerators()]
-    relayout!(p, title_text="Exercise 1 plots")
+    relayout!(p, title_text="Exercise 3 plots")
     display(p)
-
-    # Exercise 2
-    
-
 
     nothing
 
