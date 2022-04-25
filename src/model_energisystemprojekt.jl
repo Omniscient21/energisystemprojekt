@@ -17,7 +17,7 @@ function buildmodel(input)
         Emission                                              >= 0        # Mton
 
         # Exercise 2
-        BatteryStorage[r in REGION, h in HOUR]                >= 0        # MWh / MW
+        BatteryContent[r in REGION, h in HOUR]                >= 0        # MWh / MW
         BatteryInput[r in REGION, h in HOUR]                  >= 0        # MW
     end #variables
     #print(Capacity)
@@ -39,7 +39,7 @@ function buildmodel(input)
     @expression(m, Systemcost[r in REGION], Runningcost[r] + Investmentcost[r] + Fuelcost[r]) # €
 
     @expression(m, GeneratedElectricity[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)) # MW
-    #@expression(m, GeneratedElectricity[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])
+    @expression(m, GeneratedElectricityNet[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])
 
     @expression(m, CapacityPerHour[r in REGION, p in PLANT, h in HOUR], sum(InstalledCapacity[r, p].*cf[r, p, h])) # MW
 
@@ -58,8 +58,10 @@ function buildmodel(input)
         CapacityConstraints[r in REGION, p in PLANT],
             InstalledCapacity[r, p] <= maxcap[r,p]
 
+        #GenElec[r in REGION, h in HOUR],
+        #    GeneratedElectricity[r, h] >= load[r, h]
         GenElec[r in REGION, h in HOUR],
-            GeneratedElectricity[r, h] >= load[r, h]
+            GeneratedElectricityNet[r, h] >= load[r, h]
 
         ReservoirBalance[h in HOUR[1:end-1]],
             ReservoirContent[h+1] <= ReservoirContent[h] + hydro_inflow[h] - Electricity[:SE, :Hydro, h]./(10^6) #TODO: h-1 correct?
@@ -78,13 +80,13 @@ function buildmodel(input)
             Emission >= sum((Electricity[r, :Gas, h]./assum[:Efficiency, :Gas]).*assum[:EmissionFactor, :Gas] for r in REGION, h in HOUR)./(10^6)
 
         MaxEmission,
-            Emission <= 30
+            Emission <= 70 #Mton CO2
 
 
         BatteryBalance[r in REGION, h in HOUR[1:end-1]],
-            BatteryContent[r, h+1] <= BatteryContent[h] - Electricity[r, :Batteries, h]./assum[:Efficiency, :Batteries] + BatteryInput[r, h] #TODO: h-1 correct?
+            BatteryContent[r, h+1] <= BatteryContent[r, h] - Electricity[r, :Batteries, h]./assum[:Efficiency, :Batteries] + BatteryInput[r, h] #TODO: h-1 correct?
 
-        BatteryInputBound[r in Region, h in HOUR],
+        BatteryInputMax[r in Region, h in HOUR],
             BatteryInput[r, h] <= sum(Electricity[r,p,h] for p in PLANT) # can get input from batteries, but would be inefficient
 
         BatteryMax[r in REGION, h in HOUR],

@@ -76,7 +76,8 @@ function runmodel()
     relayout!(p, title_text="Exercise 1 plots")
     display(p)
 
-
+    # Exercise 2
+    
 
 
     nothing
