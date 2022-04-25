@@ -10,7 +10,7 @@ function read_input()
 
     #Sets
     REGION = [:DE, :SE, :DK]
-    PLANT = [:Wind, :PV, :Gas, :Hydro, :Batteries, :Transmission] #, :Nuclear]
+    PLANT = [:Wind, :PV, :Gas, :Hydro, :Batteries, :Transmission, :Nuclear]
     PLANTFACT = [:InvestmentCost, :RunCost, :FuelCost, :Lifetime, :Efficiency, :EmissionFactor]
     HOUR = 1:8760
 
@@ -50,7 +50,7 @@ function read_input()
             :Hydro        0               14               0
             :Batteries    myinf          myinf           myinf
             :Transmission myinf          myinf           myinf
-            #:Nuclear      myinf          myinf           myinf
+            :Nuclear      myinf          myinf           myinf
     ]
 
     assumptions = [ #   €/kW      €/MWh       €/MWh_f     yrs     (MWh_e/MWh_f)  tonCO2/MWh_f
@@ -61,7 +61,7 @@ function read_input()
         :Hydro          0           0.1         0           80          1           0
         :Batteries      150         0.1         0           10          0.9         0
         :Transmission   2500        0           0           50          0.98        0
-        #:Nuclear        7700        4           3.2         50          0.4         0
+        :Nuclear        7700        4           3.2         50          0.4         0
     ] #TODO: check asterisks
 
     maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT)      # GW->MW

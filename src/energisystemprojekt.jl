@@ -52,9 +52,9 @@ function runmodel()
     end
     Combination = [:DeSe, :SeDk, :DkDe]
     TransCap = AxisArray(zeros(numregions), Combination) # "Germany-Sweden", "Sweden-Denmark", "Denmark-Germany"
-    for c in Combination
-       TransCap[r, R] = value.(TransmissionCapacity[r, R])
-    end
+    TransCap[Combination[1]] = value.(TransmissionCapacity[:DE, :SE])
+    TransCap[Combination[2]] = value.(TransmissionCapacity[:SE, :DK])
+    TransCap[Combination[3]] = value.(TransmissionCapacity[:DK, :DE])
 
     Cost_result = objective_value(m)/1000000 # €->M€
     Capacity_result = value.(InstalledCapacity)
@@ -65,6 +65,7 @@ function runmodel()
     println("CO2 Emission (Mton): ", Emission_result)
     println("Annual production (MWh): ", AnnualProduction)
     println("Regional Capacity (MW): ", RegionalCapacity)
+    println("Transmission Capacity (MW): ", TransCap)
     #println("Produktion in Germany (MW): ", GermanyGenerators)
 
     # Plots:
@@ -77,12 +78,12 @@ function runmodel()
     dfGermanyGenerators = DataFrame(A=GermanyGenerators, B=147:651)
     plot_GermanyGenerators() = plot(dfGermanyGenerators, x=dfGermanyGenerators.B, y = dfGermanyGenerators.A, kind="scatter", mode="lines", Layout(title="Production in Germany hour 147-651 (MW)"))
 
-    p = [plot_InstalledCapacities(); plot_GeneratedElectricity(); plot_GermanyGenerators()]
+    dfTransmissionCapacity = DataFrame(A=TransCap, B=["Germany-Sweden", "Sweden-Denmark", "Denmark-Germany"])
+    plot_TransmissionCapacity() = plot(dfTransmissionCapacity, x=dfTransmissionCapacity.B, y = dfTransmissionCapacity.A, kind = "bar", Layout(title="Transmission Capacity (MW)"))
+
+    p = [plot_InstalledCapacities(); plot_GeneratedElectricity(); plot_GermanyGenerators(); plot_TransmissionCapacity()]
     relayout!(p, title_text="Exercise 3 plots")
     display(p)
-
-    dfTransmissionCapacity = DataFrame(A=TransCap, B=["Germany-Sweden", "Sweden-Denmark", "Denmark-Germany"])
-    display(plot(dfGermanyGenerators, x=dfTransmissionCapacity.B, y = dfTransmissionCapacity.A, kind = "bar", Layout(title="Transmission Capacity (MW)")))
 
 
 
