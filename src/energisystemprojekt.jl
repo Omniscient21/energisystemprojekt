@@ -18,7 +18,7 @@ function runmodel()
 
     model = buildmodel(input)
 
-    @unpack m, InstalledCapacity, Electricity, Emission, GeneratedElectricity = model
+    @unpack m, InstalledCapacity, Electricity, Emission, GeneratedElectricity, TransmissionCapacity = model
     @unpack REGION, PLANT, HOUR, numregions, numplants = input
 
     println("\nSolving model...")
@@ -50,6 +50,11 @@ function runmodel()
     for h in 147:651
        GermanyGenerators[h-146] = value.(GeneratedElectricity[:DE, h])
     end
+    Combination = [:DeSe, :SeDk, :DkDe]
+    TransCap = AxisArray(zeros(numregions), Combination) # "Germany-Sweden", "Sweden-Denmark", "Denmark-Germany"
+    for c in Combination
+       TransCap[r, R] = value.(TransmissionCapacity[r, R])
+    end
 
     Cost_result = objective_value(m)/1000000 # €->M€
     Capacity_result = value.(InstalledCapacity)
@@ -75,6 +80,11 @@ function runmodel()
     p = [plot_InstalledCapacities(); plot_GeneratedElectricity(); plot_GermanyGenerators()]
     relayout!(p, title_text="Exercise 3 plots")
     display(p)
+
+    dfTransmissionCapacity = DataFrame(A=TransCap, B=["Germany-Sweden", "Sweden-Denmark", "Denmark-Germany"])
+    display(plot(dfGermanyGenerators, x=dfTransmissionCapacity.B, y = dfTransmissionCapacity.A, kind = "bar", Layout(title="Transmission Capacity (MW)")))
+
+
 
     nothing
 

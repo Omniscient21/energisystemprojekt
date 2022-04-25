@@ -10,7 +10,7 @@ function read_input()
 
     #Sets
     REGION = [:DE, :SE, :DK]
-    PLANT = [:Wind, :PV, :Gas, :Hydro, :Batteries]#, :Transmission, :Nuclear]
+    PLANT = [:Wind, :PV, :Gas, :Hydro, :Batteries, :Transmission] #, :Nuclear]
     PLANTFACT = [:InvestmentCost, :RunCost, :FuelCost, :Lifetime, :Efficiency, :EmissionFactor]
     HOUR = 1:8760
 
@@ -49,18 +49,18 @@ function read_input()
             :Gas          myinf          myinf           myinf
             :Hydro        0               14               0
             :Batteries    myinf          myinf           myinf
-            #:Transmission myinf          myinf           myinf
+            :Transmission myinf          myinf           myinf
             #:Nuclear      myinf          myinf           myinf
     ]
 
-    assumptions = [ #   €/kW      €/MWh       €/MWh_f     yrs      MWh_e/MWh_f  tonCO2/MWh_f
+    assumptions = [ #   €/kW      €/MWh       €/MWh_f     yrs     (MWh_e/MWh_f)  tonCO2/MWh_f
         # Plant      Inv. cost   Run. cost  Fuel cost   Lifetime    Efficiency  Em. factor
         :Wind           1100        0.1         0           25          1           0
         :PV             600         0.1         0           25          1           0
         :Gas            550         2           22          30          0.4         0.202 # TODO: check fuel cost
         :Hydro          0           0.1         0           80          1           0
         :Batteries      150         0.1         0           10          0.9         0
-        #:Transmission   2500        0           0           50          0.98        0
+        :Transmission   2500        0           0           50          0.98        0
         #:Nuclear        7700        4           3.2         50          0.4         0
     ] #TODO: check asterisks
 

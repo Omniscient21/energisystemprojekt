@@ -21,7 +21,8 @@ function buildmodel(input)
         BatteryInput[r in REGION, h in HOUR]                  >= 0        # MW
 
         # Exercise 3
-        Transmission[r in REGION, r in REGION, h in HOUR]     >= 0
+        TransmissionCapacity[r in REGION, R in REGION]        >= 0        # MW
+        Transmission[r in REGION, R in REGION, h in HOUR]     >= 0        # MW, r: transmission in, R: transmission out
     end #variables
     #print(Capacity)
 
@@ -41,9 +42,10 @@ function buildmodel(input)
     @expression(m, Fuelcost[r in REGION], sum(Electricity[r,p,h].*assum[:FuelCost,p]./assum[:Efficiency,p] for h in HOUR, p in PLANT)) #€
     @expression(m, Systemcost[r in REGION], Runningcost[r] + Investmentcost[r] + Fuelcost[r]) # €
 
-    @expression(m, GeneratedElectricity[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)) # MW
+    @expression(m, GeneratedElectricity[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in [:Wind, :PV, :Gas, :Hydro])) # MW
     #@expression(m, GeneratedElectricityNet[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])
-    @expression(m, GeneratedElectricityNet[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])+sum(Transmission[r, R, h] for R in REGION, h in HOUR)
+    @expression(m, GeneratedElectricityNet[r in REGION, h in HOUR],
+        sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h]-sum(Transmission[R, r, h] for R in REGION)./assum[:Efficiency,:Transmission]) # transmission input in Electricity[r, :Transmission,h]
 
     @expression(m, CapacityPerHour[r in REGION, p in PLANT, h in HOUR], sum(InstalledCapacity[r, p].*cf[r, p, h])) # MW
 
@@ -76,9 +78,6 @@ function buildmodel(input)
         ReservoirLimit[h in HOUR],
             ReservoirContent[h] <= 33 # TWh
 
-        #EmissionConstraint,
-        #    CO2emission >= Emission
-
         #Exercise 2:
         MinEmission,
             Emission >= sum((Electricity[r, :Gas, h]./assum[:Efficiency, :Gas]).*assum[:EmissionFactor, :Gas] for r in REGION, h in HOUR)./(10^6)
@@ -97,7 +96,20 @@ function buildmodel(input)
             BatteryContent[r, h] <= InstalledCapacity[r, :Batteries]
 
         #Exercise 3 TODO: transmission constraints
-        
+        TransmissionCapacityEquality[r in REGION, R in REGION],
+            TransmissionCapacity[r, R] == TransmissionCapacity[R, r]
+
+        TransmissionCapacityMax[r in REGION, R in REGION],
+            TransmissionCapacity[r, R] <= maxcap[r, :Transmission]
+
+        TransmissionMax[r in REGION, R in REGION, h in HOUR],
+            Transmission[r, R, h] <= TransmissionCapacity[r, R]
+
+        TransmissionProduction[r in REGION, h in HOUR], # transmission in
+            sum(Transmission[r, R, h] for R in REGION) == Electricity[r, :Transmission, h]
+
+
+        # Exercise 4
 
     end #constraints
 
@@ -105,7 +117,7 @@ function buildmodel(input)
         sum(Systemcost[r] for r in REGION)
     end # objective
 
-    return (; m, InstalledCapacity, Electricity, Emission, GeneratedElectricity)
+    return (; m, InstalledCapacity, Electricity, Emission, GeneratedElectricity, TransmissionCapacity)
 
 end # buildmodel
 
