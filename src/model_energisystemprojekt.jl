@@ -81,7 +81,6 @@ function buildmodel(input)
         MaxEmission,
             Emission <= 13.9 #Mton CO2
 
-
         BatteryBalance[r in REGION, h in HOUR[1:end-1]],
             BatteryContent[r, h+1] <= BatteryContent[r, h] - Electricity[r, :Batteries, h]./assum[:Efficiency, :Batteries] + BatteryInput[r, h] #TODO: h-1 correct?
 
@@ -100,7 +99,7 @@ function buildmodel(input)
 
             # Kolla så att blev rätt
         TransmissionInstalledCapacity[r in REGION],
-            sum(TransmissionCapacity[r, R], for R in REGION) == InstalledCapacity[r, p]
+            sum(TransmissionCapacity[r, R] for R in REGION)./2 == InstalledCapacity[r, :Transmission]
 
         TransmissionMax[r in REGION, R in REGION, h in HOUR],
             Transmission[r, R, h] <= TransmissionCapacity[r, R]

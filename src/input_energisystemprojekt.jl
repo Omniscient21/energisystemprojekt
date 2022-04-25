@@ -62,7 +62,7 @@ function read_input()
         :Batteries      150         0.1         0           10          0.9         0
         :Transmission   2500        0           0           50          0.98        0
         :Nuclear        7700        4           3.2         50          0.4         0
-    ] #TODO: check asterisks
+    ]
 
     maxcap = AxisArray(maxcaptable[:,2:end]'.*1000, REGION, PLANT)      # GW->MW
     assum = AxisArray(assumptions[:,2:end]', PLANTFACT, PLANT)          # ' used for matrix transpose

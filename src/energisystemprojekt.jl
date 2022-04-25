@@ -81,6 +81,7 @@ function runmodel()
     dfTransmissionCapacity = DataFrame(A=TransCap, B=["Germany-Sweden", "Sweden-Denmark", "Denmark-Germany"])
     plot_TransmissionCapacity() = plot(dfTransmissionCapacity, x=dfTransmissionCapacity.B, y = dfTransmissionCapacity.A, kind = "bar", Layout(title="Transmission Capacity (MW)"))
 
+
     p = [plot_InstalledCapacities(); plot_GeneratedElectricity(); plot_GermanyGenerators(); plot_TransmissionCapacity()]
     relayout!(p, title_text="Exercise 3 plots")
     display(p)
