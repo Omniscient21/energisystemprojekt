@@ -6,7 +6,7 @@ function buildmodel(input)
 
     println("\nBuilding model...")
 
-    @unpack REGION, PLANT, PLANTFACT, HOUR, numregions, load, maxcap, assum, discountrate, cf, hydro_inflow = input
+    @unpack REGION, PLANT, PLANTFACT, HOUR, numregions, CO2Cap, load, maxcap, assum, discountrate, cf, hydro_inflow = input
 
     m = Model(Gurobi.Optimizer)
 
@@ -16,11 +16,11 @@ function buildmodel(input)
         ReservoirContent[h in HOUR]                           >= 0        # TWh
         Emission                                              >= 0        # Mton
 
-        # Exercise 2
+        # # Exercise 2
         BatteryContent[r in REGION, h in HOUR]                >= 0        # MWh / MW
         BatteryInput[r in REGION, h in HOUR]                  >= 0        # MW
-
-        # Exercise 3
+        #
+        # # Exercise 3
         TransmissionCapacity[r in REGION, R in REGION]        >= 0        # MW
         Transmission[r in REGION, R in REGION, h in HOUR]     >= 0        # MW, r: transmission in, R: transmission out
     end #variables
@@ -42,8 +42,8 @@ function buildmodel(input)
     @expression(m, Fuelcost[r in REGION], sum(Electricity[r,p,h].*assum[:FuelCost,p]./assum[:Efficiency,p] for h in HOUR, p in PLANT)) #€
     @expression(m, Systemcost[r in REGION], Runningcost[r] + Investmentcost[r] + Fuelcost[r]) # €
 
-    @expression(m, GeneratedElectricity[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in [:Wind, :PV, :Gas, :Hydro, :Nuclear])) # MW
-    #@expression(m, GeneratedElectricityNet[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])
+    @expression(m, GeneratedElectricity[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in [:Wind, :PV, :Gas, :Hydro]))#, :Nuclear])) # MW
+    # @expression(m, GeneratedElectricityNet[r in REGION, h in HOUR], sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h])
     @expression(m, GeneratedElectricityNet[r in REGION, h in HOUR],
         sum(Electricity[r,p,h] for p in PLANT)-BatteryInput[r,h]-sum(Transmission[R, r, h] for R in REGION)./assum[:Efficiency,:Transmission]) # transmission input in Electricity[r, :Transmission,h]
 
@@ -61,12 +61,12 @@ function buildmodel(input)
             InstalledCapacity[r, p] <= maxcap[r,p]
 
         #GenElec[r in REGION, h in HOUR],
-        #    GeneratedElectricity[r, h] >= load[r, h]
+        #   GeneratedElectricity[r, h] >= load[r, h]
         GenElec[r in REGION, h in HOUR],
             GeneratedElectricityNet[r, h] >= load[r, h]
 
         ReservoirBalance[h in HOUR[1:end-1]],
-            ReservoirContent[h+1] <= ReservoirContent[h] + hydro_inflow[h] - Electricity[:SE, :Hydro, h]./(10^6) #TODO: h-1 correct?
+            ReservoirContent[h+1] <= ReservoirContent[h] + hydro_inflow[h] - Electricity[:SE, :Hydro, h]./(10^6)
 
         ReservoirEndOfYear,
             ReservoirContent[1] == ReservoirContent[end]
@@ -74,12 +74,12 @@ function buildmodel(input)
         ReservoirLimit[h in HOUR],
             ReservoirContent[h] <= 33 # TWh
 
-        #Exercise 2:
+        # #Exercise 2:
         MinEmission,
             Emission >= sum((Electricity[r, :Gas, h]./assum[:Efficiency, :Gas]).*assum[:EmissionFactor, :Gas] for r in REGION, h in HOUR)./(10^6)
 
         MaxEmission,
-            Emission <= 13.9 #Mton CO2
+            Emission <= CO2Cap #Mton CO2
 
         BatteryBalance[r in REGION, h in HOUR[1:end-1]],
             BatteryContent[r, h+1] <= BatteryContent[r, h] - Electricity[r, :Batteries, h]./assum[:Efficiency, :Batteries] + BatteryInput[r, h] #TODO: h-1 correct?
@@ -90,7 +90,7 @@ function buildmodel(input)
         BatteryMax[r in REGION, h in HOUR],
             BatteryContent[r, h] <= InstalledCapacity[r, :Batteries]
 
-        #Exercise 3
+        # #Exercise 3
         TransmissionCapacityEquality[r in REGION, R in REGION],
             TransmissionCapacity[r, R] == TransmissionCapacity[R, r]
 

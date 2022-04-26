@@ -26,6 +26,8 @@ function read_input()
 
     load = AxisArray(zeros(numregions, numhours), REGION, HOUR)
 
+    CO2Cap = 13.9 # Mton CO2
+
     for r in REGION
         wind_cf[r, :]=timeseries[:, "Wind_"*"$r"]             # 0-1, share of installed cap
         pv_cf[r, :]=timeseries[:, "PV_"*"$r"]                 # 0-1, share of installed cap
@@ -44,7 +46,7 @@ function read_input()
     myinf = 1e8
     maxcaptable = [ # GW
             # PLANT       DE             SE              DK
-            :Wind         180            280              90 # TODO: change back into correct values
+            :Wind         180            280              90
             :PV           460             75              60
             :Gas          myinf          myinf           myinf
             :Hydro        0               14               0
@@ -57,7 +59,7 @@ function read_input()
         # Plant      Inv. cost   Run. cost  Fuel cost   Lifetime    Efficiency  Em. factor
         :Wind           1100        0.1         0           25          1           0
         :PV             600         0.1         0           25          1           0
-        :Gas            550         2           22          30          0.4         0.202 # TODO: check fuel cost
+        :Gas            550         2           22          30          0.4         0.202
         :Hydro          0           0.1         0           80          1           0
         :Batteries      150         0.1         0           10          0.9         0
         :Transmission   2500        0           0           50          0.98        0
@@ -69,6 +71,6 @@ function read_input()
 
     discountrate=0.05
 
-    return (; REGION, PLANT, PLANTFACT, HOUR, numregions, numplants, load, maxcap, assum, discountrate, cf, hydro_inflow)
+    return (; REGION, PLANT, PLANTFACT, HOUR, numregions, numplants, CO2Cap, load, maxcap, assum, discountrate, cf, hydro_inflow)
 
 end # read_input
