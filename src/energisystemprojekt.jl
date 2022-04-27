@@ -68,12 +68,12 @@ function runmodel()
     Emission_result = value.(Emission) # Mton CO2
 
     println("Cost (M€): ", Cost_result)
-    println("Capacity (MW): ", Capacity_result)
+    # println("Capacity (MW): ", Capacity_result)
     println("CO2 Emission (Mton): ", Emission_result)
     println("Annual production (MWh): ", AnnualProduction)
     println("Regional Capacity (MW): ", RegionalCapacity)
     println("Transmission Capacity (MW): ", TransCap)
-    println("Produktion in Germany (MW): ", GermanyGenerators)
+    # println("Production in Germany (MW): ", GermanyGenerators)
 
     # Plots:
     # dfInstalledCapacities = DataFrame(A=RegionalCapacity, B=[:Germany, :Sweden, :Denmark])
